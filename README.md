@@ -1,59 +1,229 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🖼️ Product Gallery Manager
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Technical Assessment — RazinSoft Limited**
+**Candidate:** Mozammel Haq
+**Role:** Junior Web Developer
+**Deadline:** 30 March 2026
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+A full-featured Laravel 12 product gallery management application that allows an admin to create, view, edit, and delete products — each with multiple image uploads. Built with clean architecture, Eloquent ORM relationships, Blade templating, and a premium custom dark UI design system.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ✅ Requirements Checklist
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+| Requirement                                             | Status |
+| ------------------------------------------------------- | ------ |
+| Laravel 12                                              | ✅     |
+| Add product (name, description, multiple images)        | ✅     |
+| View product with images                                | ✅     |
+| Edit product + add/remove images                        | ✅     |
+| Delete product + all images from DB & storage           | ✅     |
+| Eloquent relationships (Product → hasMany ProductImage) | ✅     |
+| Images stored in `storage/app/public/products`          | ✅     |
+| Laravel Storage facade for all file handling            | ✅     |
+| Validation (required fields, JPEG/PNG/WebP, max 2MB)    | ✅     |
+| Blade templating (no frontend framework)                | ✅     |
+| Migrations                                              | ✅     |
+| Model                                                   | ✅     |
+| CSRF protection on all forms                            | ✅     |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🔥 Bonus Features
 
-## Laravel Sponsors
+| Bonus                                             | Status |
+| ------------------------------------------------- | ------ |
+| Drag-and-drop image upload (JavaScript)           | ✅     |
+| AJAX image removal (existing images on edit page) | ✅     |
+| Responsive custom UI (Tailwind CSS)               | ✅     |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🚀 Installation & Setup
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Prerequisites
 
-## Contributing
+- PHP 8.2+
+- Composer
+- SQLite (default) or MySQL/PostgreSQL
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Step-by-step
 
-## Code of Conduct
+```bash
+# 1. Clone the repository
+git clone https://github.com/Mozammel-Haq/Razinsoft-Task.git
+cd Razinsoft-task
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 2. Install PHP dependencies
+composer install
 
-## Security Vulnerabilities
+# 3. Copy environment file and configure
+cp .env.example .env
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 4. Generate application key
+php artisan key:generate
 
-## License
+# 5. Run database migrations
+php artisan migrate
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 7. Create the storage symlink (serves uploaded images)
+php artisan storage:link
+
+# 8. Start the development server
+php artisan serve
+```
+
+Open your browser at **http://localhost:8000**
+
+---
+
+## 🗂️ Project Structure
+
+```
+product-gallery-manager/
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   │       └── ProductController.php   # Full CRUD + AJAX endpoints
+│   └── Models/
+│       ├── Product.php                 # HasMany images
+│       └── ProductImage.php            # BelongsTo product, auto-deletes file
+│
+├── database/
+│   ├── migrations/
+│   │   ├── ..._create_products_table.php
+│   │   └── ..._create_product_images_table.php
+│
+├── resources/
+│   └── views/
+│       ├── layouts/
+│       │   └── app.blade.php           # Master layout with nav, toast, footer
+│       └── products/
+│           ├── index.blade.php         # Product grid with stats
+│           ├── create.blade.php        # Create form with drop zone
+│           ├── edit.blade.php          # Edit form with AJAX image removal
+│           └── show.blade.php          # Detail view with gallery lightbox
+│
+├── routes/
+│   └── web.php                         # Resource routes + AJAX image routes
+│
+└── storage/
+    └── app/
+        └── public/
+            └── products/               # Uploaded images stored here
+```
+
+---
+
+## 🏗️ Architecture & Design Decisions
+
+### Eloquent Relationships
+
+```php
+// Product hasMany ProductImage
+class Product extends Model
+{
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+}
+
+// ProductImage belongsTo Product
+class ProductImage extends Model
+{
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+}
+```
+
+### Automatic File Cleanup
+
+The `ProductImage` model uses a `boot()` hook to delete the physical file from storage whenever the model record is deleted — ensuring no orphaned files remain:
+
+```php
+protected static function boot(): void
+{
+    parent::boot();
+    static::deleting(function (ProductImage $image) {
+        Storage::disk('public')->delete('products/' . $image->filename);
+    });
+}
+```
+
+### File Storage
+
+All uploads go to `storage/app/public/products/` and are served via the `storage:link` symlink at `public/storage/products/`. Filenames are UUID-generated to prevent collisions and enumeration attacks.
+
+### Validation Rules
+
+```php
+'images.*' => 'required|file|mimes:jpeg,jpg,png,webp|max:2048'
+```
+
+- Allowed types: JPEG, JPG, PNG, WebP
+- Maximum size: 2MB per file
+- At least 1 image required on create
+
+### CSRF Protection
+
+All forms include `@csrf`. The AJAX DELETE endpoint for image removal reads the CSRF token from the `<meta name="csrf-token">` tag and passes it as `X-CSRF-TOKEN` header.
+
+---
+
+## 🎨 UI Design System
+
+Built with Tailwind CSS (via Vite) + minimal custom utilities — no Bootstrap, no heavy frameworks.
+
+Design Language
+
+Primary color: Indigo-600 (#4f46e5) for actions, highlights, active states
+Backgrounds: White (#ffffff) cards on light gray-50 (#f9fafb) page background
+Text: Gray-900 headings, gray-600 body, gray-400/500 for metadata
+
+Feedback:
+✅ Success: Emerald-500 (#10b981)
+❌ Error: Red-500 (#ef4444)
+⚠️ Warning: Amber-500 (#f59e0b)
+
+Typography:
+Body: Inter (Google Fonts) — clean, highly readable sans-serif
+Headings: Space Grotesk — distinctive, modern display font
+Icons: Phosphor Icons (@phosphor-icons/web) — consistent, lightweight SVG set
+Spacing: Tailwind's 4px baseline grid (p-4, gap-6, mb-8, etc.)
+Shadows: Subtle shadow-lg on modals, hover lifts on buttons (active:translate-y-px)
+Animations: CSS keyframes for toast slide-in, smooth opacity transitions for gallery
+
+---
+
+## 📡 API Routes
+
+| Method | URI                               | Action              |
+| ------ | --------------------------------- | ------------------- |
+| GET    | `/products`                       | index               |
+| GET    | `/products/create`                | create              |
+| POST   | `/products`                       | store               |
+| GET    | `/products/{id}`                  | show                |
+| GET    | `/products/{id}/edit`             | edit                |
+| PUT    | `/products/{id}`                  | update              |
+| DELETE | `/products/{id}`                  | destroy             |
+| DELETE | `/products/{id}/images/{imageId}` | destroyImage (AJAX) |
+| POST   | `/products/{id}/images`           | storeImages (AJAX)  |
+
+---
+
+## 📝 Notes
+
+- MySQL is used by default — configure env if needed
+- Run `php artisan storage:link` once after install to serve uploaded images
+- All validation errors are displayed inline with custom styled error components
+- The `destroyImage` AJAX endpoint validates that the image belongs to the given product before deletion.
+
+## 📄 License
+
+This project is created for technical assessment purposes.
+© 2026 Mozammel Haq — All rights reserved.

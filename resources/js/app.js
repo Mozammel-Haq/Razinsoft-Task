@@ -287,9 +287,7 @@ function initConfirmModal() {
         }
     });
 
-    cancelBtns.forEach((btn) =>
-        btn.addEventListener("click", closeModal),
-    );
+    cancelBtns.forEach((btn) => btn.addEventListener("click", closeModal));
 
     backdrop.addEventListener("click", (e) => {
         if (e.target === backdrop) {
