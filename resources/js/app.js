@@ -4,6 +4,8 @@ import "./bootstrap";
  * Handles: drag-drop upload, AJAX image remove, confirm modal, gallery lightbox
  */
 
+let pgmSelectedFiles = [];
+
 document.addEventListener("DOMContentLoaded", () => {
     initDropzone();
     initConfirmModal();
@@ -44,33 +46,49 @@ function initDropzone() {
         e.preventDefault();
         const files = e.dataTransfer.files;
         if (files.length) {
-            addFilesToInput(files, fileInput);
-            renderPreviews(files, preview, false);
+            addFiles(files, fileInput, preview);
         }
     });
 
     // Input change
     fileInput.addEventListener("change", () => {
         if (fileInput.files.length) {
-            renderPreviews(fileInput.files, preview, false);
+            addFiles(fileInput.files, fileInput, preview);
         }
     });
 }
 
-/* Merge new files into a DataTransfer so we keep existing + new */
-function addFilesToInput(newFiles, input) {
+/* Maintain selected files in memory + sync to input */
+function syncSelectedFiles(input) {
     const dt = new DataTransfer();
+    pgmSelectedFiles.forEach((file) => dt.items.add(file));
+    input.files = dt.files;
+}
 
-    // Preserve existing files
-    if (input.files) {
-        Array.from(input.files).forEach((f) => dt.items.add(f));
-    }
+function isDuplicateFile(file) {
+    return pgmSelectedFiles.some(
+        (existing) =>
+            existing.name === file.name &&
+            existing.size === file.size &&
+            existing.lastModified === file.lastModified,
+    );
+}
 
-    Array.from(newFiles).forEach((f) => {
-        if (isValidImage(f)) dt.items.add(f);
+function addFiles(files, input, preview) {
+    const newFiles = [];
+
+    Array.from(files).forEach((file) => {
+        if (!isValidImage(file)) return;
+        if (isDuplicateFile(file)) return;
+
+        pgmSelectedFiles.push(file);
+        newFiles.push(file);
     });
 
-    input.files = dt.files;
+    if (!newFiles.length) return;
+
+    syncSelectedFiles(input);
+    renderPreviews(newFiles, preview, false);
 }
 
 function isValidImage(file) {
@@ -101,6 +119,7 @@ function renderPreviews(files, container, isSaved) {
                 file.name,
                 null,
                 isSaved,
+                file,
             );
             container.appendChild(item);
         };
@@ -108,10 +127,15 @@ function renderPreviews(files, container, isSaved) {
     });
 }
 
-function buildPreviewItem(src, name, imageId, isSaved) {
+function buildPreviewItem(src, name, imageId, isSaved, file) {
     const item = document.createElement("div");
     item.className = "pgm-preview-item" + (isSaved ? " is-saved" : "");
     if (imageId) item.dataset.imageId = imageId;
+    if (!isSaved && file) {
+        item.dataset.fileName = file.name;
+        item.dataset.fileSize = file.size;
+        item.dataset.fileLastModified = file.lastModified;
+    }
 
     item.innerHTML = `
         <img src="${src}" alt="${name}" loading="lazy">
@@ -127,12 +151,35 @@ function buildPreviewItem(src, name, imageId, isSaved) {
             if (isSaved && imageId) {
                 removeExistingImage(imageId, item);
             } else {
-                item.remove();
+                removeTempImage(item);
             }
         },
     );
 
     return item;
+}
+
+function removeTempImage(itemEl) {
+    if (!itemEl.dataset.fileName) {
+        itemEl.remove();
+        return;
+    }
+
+    pgmSelectedFiles = pgmSelectedFiles.filter(
+        (f) =>
+            !(
+                f.name === itemEl.dataset.fileName &&
+                f.size === Number(itemEl.dataset.fileSize) &&
+                f.lastModified === Number(itemEl.dataset.fileLastModified)
+            ),
+    );
+
+    const fileInput = document.getElementById("pgmFileInput");
+    if (fileInput) {
+        syncSelectedFiles(fileInput);
+    }
+
+    itemEl.remove();
 }
 
 /* ─────────────────────────────────────────
@@ -154,10 +201,16 @@ function initAjaxImageRemove() {
         previewGrid.appendChild(item);
     });
 }
-
 function removeExistingImage(imageId, itemEl) {
     const productId = document.getElementById("pgmProductId")?.value;
     if (!productId) return;
+
+    const routeTemplate =
+        window.pgmRoutes?.imageDestroy ||
+        "/products/__PRODUCT__/images/__IMAGE__";
+    const url = routeTemplate
+        .replace("__PRODUCT__", productId)
+        .replace("__IMAGE__", imageId);
 
     const csrfToken = document.querySelector(
         'meta[name="csrf-token"]',
@@ -166,7 +219,7 @@ function removeExistingImage(imageId, itemEl) {
     itemEl.style.opacity = "0.5";
     itemEl.style.pointerEvents = "none";
 
-    fetch(`/products/${productId}/images/${imageId}`, {
+    fetch(url, {
         method: "DELETE",
         headers: {
             "X-CSRF-TOKEN": csrfToken,
@@ -204,6 +257,17 @@ function initConfirmModal() {
     const cancelBtns = backdrop.querySelectorAll("[data-modal-close]");
     let pendingForm = null;
 
+    const openModal = () => {
+        backdrop.classList.remove("hidden");
+        backdrop.classList.add("flex");
+    };
+
+    const closeModal = () => {
+        backdrop.classList.remove("flex");
+        backdrop.classList.add("hidden");
+        pendingForm = null;
+    };
+
     // Wire all delete-trigger buttons
     document.querySelectorAll("[data-delete-form]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
@@ -213,7 +277,7 @@ function initConfirmModal() {
             const name = btn.dataset.productName || "this product";
 
             backdrop.querySelector("#pgmDeleteTarget").textContent = name;
-            backdrop.classList.add("is-open");
+            openModal();
         });
     });
 
@@ -224,23 +288,18 @@ function initConfirmModal() {
     });
 
     cancelBtns.forEach((btn) =>
-        btn.addEventListener("click", () => {
-            backdrop.classList.remove("is-open");
-            pendingForm = null;
-        }),
+        btn.addEventListener("click", closeModal),
     );
 
     backdrop.addEventListener("click", (e) => {
         if (e.target === backdrop) {
-            backdrop.classList.remove("is-open");
-            pendingForm = null;
+            closeModal();
         }
     });
 
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            backdrop.classList.remove("is-open");
-            pendingForm = null;
+            closeModal();
         }
     });
 }

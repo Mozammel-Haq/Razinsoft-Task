@@ -60,13 +60,13 @@
         </div>
     </header>
 
-    {{-- Flash Messages --}}
+        {{-- Flash Messages --}}
     @if(session('success'))
         <div class="fixed top-20 right-4 z-50 animate-slide-in" id="pgmToast">
-            <div class="flex items-center gap-3 px-4 py-3 bg-emerald-500 border-l-4 border-emerald-700">
-                <i class="ph-fill ph-check-circle text-white text-xl"></i>
-                <span class="text-white text-sm font-medium">{{ session('success') }}</span>
-                <button onclick="this.closest('#pgmToast').remove()" class="ml-2 text-white/70 hover:text-white">
+            <div class="flex items-center gap-3 px-5 py-4 bg-emerald-500 text-white rounded-lg shadow-lg shadow-emerald-500/20">
+                <i class="ph-fill ph-check-circle text-white text-xl flex-shrink-0"></i>
+                <span class="text-sm font-medium">{{ session('success') }}</span>
+                <button onclick="this.closest('#pgmToast').remove()" class="ml-2 text-white/80 hover:text-white transition-colors">
                     <i class="ph ph-x"></i>
                 </button>
             </div>
@@ -75,10 +75,10 @@
 
     @if(session('error'))
         <div class="fixed top-20 right-4 z-50 animate-slide-in" id="pgmToast">
-            <div class="flex items-center gap-3 px-4 py-3 bg-red-500 border-l-4 border-red-700">
-                <i class="ph-fill ph-warning-circle text-white text-xl"></i>
-                <span class="text-white text-sm font-medium">{{ session('error') }}</span>
-                <button onclick="this.closest('#pgmToast').remove()" class="ml-2 text-white/70 hover:text-white">
+            <div class="flex items-center gap-3 px-5 py-4 bg-red-500 text-white rounded-lg shadow-lg shadow-red-500/20">
+                <i class="ph-fill ph-warning-circle text-white text-xl flex-shrink-0"></i>
+                <span class="text-sm font-medium">{{ session('error') }}</span>
+                <button onclick="this.closest('#pgmToast').remove()" class="ml-2 text-white/80 hover:text-white transition-colors">
                     <i class="ph ph-x"></i>
                 </button>
             </div>
